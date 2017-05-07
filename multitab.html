@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>DepaCrawler</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script>
+
+    function buildUrls() {
+      var pi_base_url = 'http://www.portalinmobiliario.com/';
+      var gp_base_url = 'https://www.goplaceit.com/cl/propiedad/arriendo/departamento/providencia/';
+      var search = location.search.substring(1);
+      var data = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+      var pis = data['pi'] ? data['pi'].split(",") : [];
+      var gps = data['gp'] ? data['gp'].split(",") : [];
+      var urls = [];
+
+      for (var i = 0, len = pis.length; i < len; i++) {
+        if(pis[i].length < 1) { continue; }
+        urls.push(pi_base_url + pis[i])
+      }
+      for (var j = 0, len = gps.length; j < len; j++) {
+        if(gps[j].length < 1) { continue; }
+        urls.push(gp_base_url + gps[j])
+      }
+      return urls;
+    }
+
+    $(function() {
+      var urls = buildUrls();
+      console.log('URLS:', urls);
+      for (var i = 0, len = urls.length; i < len; i++) {
+        window.open(urls[i]);
+      }
+    });
+  </script>
+  </head>
+</html>
