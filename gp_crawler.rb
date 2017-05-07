@@ -42,7 +42,8 @@ module DepaCrawler
       ids.map! { |id| "GP" + id.to_s }
       { status: 'success', ids: ids }
     rescue StandardError => ex
-      { status: 'error', content: content, exception: "#{ex.class}: #{ex.message}-\n#{ex.backtrace.join("\n")}" }
+      { status: 'error', content: (r.nil? ? "nil http response" : r.body),
+        exception: "#{ex.class}: #{ex.message}-\n#{ex.backtrace.join("\n")}" }
     end
   end
 end
