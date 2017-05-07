@@ -11,7 +11,8 @@ module DepaCrawler
     ERROR_RECIPIENT = ENV.fetch('ERROR_RECIPIENT')
     NEW_IDS_RECIPIENT = ENV.fetch('NEW_IDS_RECIPIENT')
     RESULT_RECIPIENT = ENV.fetch('RESULT_RECIPIENT')
-    SUBJECT_BASE = "[PI-Crawler]"
+    SUBJECT_BASE = "[DepaCrawler]"
+    GP_LINK_PATH = ENV.fetch('GP_LINK_PATH')
 
     def send_errors(errors)
       to = ERROR_RECIPIENT
@@ -30,7 +31,7 @@ module DepaCrawler
       to = NEW_IDS_RECIPIENT
       subject = "#{SUBJECT_BASE} Tenemos nuevos departamentos! #{Date.today}"
 
-      urls = new_ids.map { |id| "#{Program::DOMAIN_URL}/#{id}"}
+      urls = new_ids.map { |id| build_url id }
 
       body = %Q(
         <b>Fecha:</b> #{Time.new}\n
@@ -45,7 +46,7 @@ module DepaCrawler
     def send_result(new_ids, errors, last_page)
       to = RESULT_RECIPIENT
       subject = "#{SUBJECT_BASE} Reporte de resultados de crawl #{Date.today}"
-      urls = new_ids.map { |id| "#{Program::DOMAIN_URL}/#{id}"}
+      urls = new_ids.map { |id| build_url id }
 
       body = %Q(
         <b>Fecha:</b> #{Time.new}\n
@@ -63,6 +64,16 @@ module DepaCrawler
     def send(to, subject, body)
       mail to: to, subject: subject do |format|
         format.html { render inline: body }
+      end
+    end
+
+    def build_url(id)
+      site = id[0..1]
+      n_id = id[2..-1]
+      if site == 'PI'
+        "#{PiCrawler::PI_HOST}/#{n_id}"
+      elsif site == 'GP'
+        "#{GpCrawler::GP_HOST}#{GP_LINK_PATH}/#{n_id}"
       end
     end
 
