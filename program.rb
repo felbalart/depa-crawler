@@ -1,10 +1,10 @@
 module DepaCrawler
 
   require 'dotenv/load'
-  require 'txt_interface'
-  require 'pi_crawler'
-  require 'gp_crawler'
-  require 'notifier'
+  require_relative 'txt_interface'
+  require_relative 'pi_crawler'
+  require_relative 'gp_crawler'
+  require_relative 'notifier'
 
   class Program
 
