@@ -35,6 +35,7 @@ module DepaCrawler
       request = Net::HTTP::Get.new(uri.request_uri)
       request['Cookie'] = cookie
       http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       r = http.request(request)
       data = JSON.parse r.body
       ids = data['response']['ids']

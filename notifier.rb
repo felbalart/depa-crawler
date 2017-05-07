@@ -11,12 +11,13 @@ module DepaCrawler
     ERROR_RECIPIENT = ENV.fetch('ERROR_RECIPIENT')
     NEW_IDS_RECIPIENT = ENV.fetch('NEW_IDS_RECIPIENT')
     RESULT_RECIPIENT = ENV.fetch('RESULT_RECIPIENT')
-    SUBJECT_BASE = "[DepaCrawler]"
+    SUBJECT_BASE = "[DepaCrawler_v2]"
     GP_LINK_PATH = ENV.fetch('GP_LINK_PATH')
+    GITHUB_MULTITAB_URL = ENV.fetch('GITHUB_MULTITAB_URL')
 
     def send_errors(errors)
       to = ERROR_RECIPIENT
-      subject = "#{SUBJECT_BASE} Se reportaron errores #{Date.today}"
+      subject = "#{SUBJECT_BASE} Se reportaron errores #{Time.new.strftime('%b%e - %p')}"
       body = %Q(
         <b>Fecha: #{Time.new}<b/>\n\n
         <b>Errores<b/>
@@ -29,13 +30,16 @@ module DepaCrawler
 
     def send_new_ids(new_ids)
       to = NEW_IDS_RECIPIENT
-      subject = "#{SUBJECT_BASE} Tenemos nuevos departamentos! #{Date.today}"
+      subject = "#{SUBJECT_BASE} Novedades #{Time.new.strftime('%b%e - %p')}"
 
       urls = new_ids.map { |id| build_url id }
+      multitab_url = build_multitab_url(new_ids)
 
       body = %Q(
-        <b>Fecha:</b> #{Time.new}\n
-        <b>Se consignaron #{new_ids.count} nuevas entradas:</b>\n
+        <b>Fecha:</b> #{Time.new.strftime('%b %e %p')}
+        <h4>Se consignaron #{new_ids.count} nuevas entradas</h4>
+        #{"<a href=\"" + multitab_url + "\">Link Multitab</a> *Requiere deshabilitar bloqueo popups" if new_ids.count > 1}\n
+        Links Individuales:
         #{urls.join("\n")}
       ).gsub("\n", '<br>')
 
@@ -45,7 +49,7 @@ module DepaCrawler
 
     def send_result(new_ids, errors, last_page)
       to = RESULT_RECIPIENT
-      subject = "#{SUBJECT_BASE} Reporte de resultados de crawl #{Date.today}"
+      subject = "#{SUBJECT_BASE} Reporte de resultados de crawl #{Time.new.strftime('%b%e - %p')}"
       urls = new_ids.map { |id| build_url id }
 
       body = %Q(
@@ -75,6 +79,14 @@ module DepaCrawler
       elsif site == 'GP'
         "#{GpCrawler::GP_HOST}#{GP_LINK_PATH}/#{n_id}"
       end
+    end
+
+    def build_multitab_url(ids)
+      grouped_ids = ids.group_by{ |w| w[0..1] }
+      params = grouped_ids.map do |site, ids|
+        site.downcase + '=' + ids.map { |sids| sids[2..-1] }.join(',')
+      end.join('&')
+      GITHUB_MULTITAB_URL + '?' + params
     end
 
     def self.gmail_setup
